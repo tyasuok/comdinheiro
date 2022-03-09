@@ -87,7 +87,6 @@ class instrument:
             print("AAAAAAAAAAAAAAAAAAHHHHHHHH PAYLOAD:", self.payload)
 
     def export(self, filename):
-        print("exporting")
         self.df.to_csv(filename)
     
     def contains(self, column, word, inplace=False):
@@ -124,39 +123,6 @@ class fund_screener(instrument):
         "&URL=FundScreener001.php" +
         encod +
         "&format=json2")
-        print(self.payload)
-
-        # old way
-        # self.payload = (self.login +
-        # "&URL=FundScreener001.php"
-        # "%3F%26relat%3D%26data_rr%3D15%2F09%2F2020%26data_cart%3D01%2F08%2F2020" +\
-        # urllib.parse.quote_plus(f"&variaveis={variaveis.replace(' ', '+')}", safe="~") +\
-        # "%26agrupar%3D"
-        # "%26gr_classe%3Dtodos"
-        # "%26cl_cvm%3Dtodos"
-        # "%26cl_anb%3Dtodos"
-        # "%26admin%3D"
-        # "%26gestor%3D"
-        # "%26situacao%3D4"
-        # "%26cotas%3D7"
-        # "%26quali%3D7"
-        # "%26exclu%3D7"
-        # "%26forma%3D3"
-        # "%26largura%3D960"
-        # "%26truncar%3D200"
-        # "%26casas%3D2"
-        # "%26salve%3D"
-        # f"%26filtro%3D{urllib.parse.quote_plus(self._encode(filtro))}"
-        # "%26join%3Dinner"
-        # "%26overwrite%3D0"
-        # "%26minha_variavel%3D"
-        # "%26transpor%3D0"
-        # "%26salve_obs%3D"
-        # "%26relat_alias_automatico%3Dcmd_alias_01"
-        # "%26flag_tab_carteira%3D0"
-        # "%26periodos%3D0"
-        # "%26periodicidade%3Dmensal"
-        # "%26formato_data%3D1&format=json2")
 
     def new_payload(self, variaveis, filtro, data_rr):
         self.payload = (self.login +
@@ -200,18 +166,6 @@ class historico_fundos(instrument):
         # formato data ddmmyyyy
         super().__init__(username, password)
 
-        # self.payload = f"{self.login}&" +\
-        #urllib.parse.quote_plus(("URL=HistoricoIndicadoresFundos001.php?&cnpjs=explode(peers_relatorio)"
-        #f"&data_ini={data_ini}&data_fim={data_fim}"
-        #f"&indicadores={variaveis}"
-        #"&op01=tabela_v&num_casas=2&enviar_email=0&periodicidade=diaria&cabecalho_excel=modo3&transpor=0&asc_desc=desc&tipo_grafico=linha&relat_alias_automatico=cmd_alias_01&format=json2"))
-
-        # patrimonio~cotistas
-            #f"%26indicadores%3D{variaveis}"
-            # urllib.parse.quote_plus(f"%26indicadores%3D{variaveis}") +\
-
-        # cnpjs original
-        # explode%28peers_relatorio%29
         self.tabela = tabela
         self.payload = (self.login + 
             "&URL=HistoricoIndicadoresFundos001.php"
@@ -223,18 +177,6 @@ class historico_fundos(instrument):
             f"%26asc_desc%3D{ordem_data}%26tipo_grafico%3Dlinha%26relat_alias_automatico%3Dcmd_alias_01%26"
             "&format=json2")
 
-        # they way i did it in the fund screener
-        # encod = urllib.parse.quote_plus(("?&relat=&data_rr=31/05/2021&data_cart=01/04/2021&"
-        # f"variaveis={urllib.parse.quote_plus(variaveis.replace(' ', '+'), safe='~')}"
-        # "&agrupar=&gr_classe=FI&cl_cvm=todos&cl_anb=todos&admin=&gestor=&situacao=4&cotas=7&quali=7&exclu=7&forma=3&largura=960&truncar=200&casas=2&salve="
-        # f"&filtro={urllib.parse.quote_plus(filtro.replace('/', '~'), safe='~').replace('-', '%BD')}"
-        # "&join=inner&overwrite=0&minha_variavel=&transpor=0&salve_obs=&relat_alias_automatico=cmd_alias_01&flag_tab_carteira=0&periodos=0&periodicidade=mensal&formato_data=1"))
-
-        # # dont encode the format
-        # self.payload = (self.login +
-        # "&URL=FundScreener001.php" +
-        # encod +
-        # "&format=json2")
     def make_df(self, fucked_json=1, tab=0):
         if self.tabela == "h":
             self.df = pd.DataFrame().from_records(self.jsn["resposta"]["tab-p0"]["linha"])  
@@ -248,14 +190,6 @@ class risk_corr(instrument):
         matriz: 0 - inteira; 1 - metade inferior; 2-metade superior
         """
         super().__init__(username, password)
-
-        # self.payload = (self.login + 
-        #     "&URL=HistoricoIndicadoresFundos001.php"
-        #     f"%3Fcnpjs%3D{urllib.parse.quote_plus(cnpjs.replace(' ', '+').replace('/', '~'), safe='~')}"
-        #     f"%26data_ini%3D{data_ini}%26data_fim%3D{data_fim}" +\
-        #     urllib.parse.quote_plus(f"&indicadores={variaveis.replace(' ', '+')}", safe="~") +\
-        #     f"%26op01%3Dtabela_v%26num_casas%3D2%26enviar_email%3D0%26periodicidade%3D{periodicidade}%26cabecalho_excel%3Dmodo3%26transpor%3D0%26asc_desc%3Ddesc%26tipo_grafico%3Dlinha%26relat_alias_automatico%3Dcmd_alias_01%26"
-        #     "&format=json2")
 
         self.payload = (self.login + 
             "&URL=Risco001.php"
@@ -302,7 +236,6 @@ class historico_multiplo(instrument):
             data_ini = data_ini.strftime("%d%m%Y")
         if type(data_fim) == datetime.date:
             data_fim = data_fim.strftime("%d%m%Y")
-        print(data_ini)
 
         super().__init__(username, password)
         self.payload = (self.login +
@@ -362,23 +295,6 @@ class make_instrument(instrument):
             self.prim_utl = tmp
             self._get_payload()
 
-class cvm_dados:
-    def __init__(self, link):
-        self.link = "http://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart.zip"
-
-    def get_data(self):
-        self.data = requests.get(self.link)
-
-    def list_files(self):
-        return zipfile.ZipFile(io.BytesIO(self.data.content)).namelist()
-
-    def select_file(self, file_name):
-        """
-        Only if file is a zip
-        """
-        self.zip = zipfile.ZipFile(io.BytesIO(self.data.content))
-        return self.zip.read(file_name)
-
 def repl_num(df, col):
     # só é útil pra verificar isso da coluna ser string com ponto pra indicador de milhar
     if df[col].str.contains(".", regex=False).any():
@@ -410,7 +326,6 @@ def drawdown(path, plot_name: list=[False, None], ibov=None, check_dates=False, 
     df = df.pct_change().iloc[1:]
     # o df.sub() pro ibov vai aqui
     df.columns = df.columns.str.strip().str.replace("\n", "")
-    # print("df.head())", df.head())
 
     if ibov is not None:
         if check_dates:
