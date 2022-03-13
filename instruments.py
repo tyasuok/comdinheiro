@@ -86,15 +86,51 @@ class instrument:
         else:
             print("AAAAAAAAAAAAAAAAAAHHHHHHHH PAYLOAD:", self.payload)
 
-    def export(self, filename):
-        self.df.to_csv(filename)
-    
-    def contains(self, column, word, inplace=False):
-        word = re.compile(word, re.I)
-        if inplace:
-            self.df = self.df[self.df[column].str.contains(word)]
+class make_instrument(instrument):
+    def __init__(self, username, password, url):
+        super().__init__(username, password)
+        self.prim_url = url
+        self._params = None
+        self._get_payload()
 
-        return self.df[self.df[column].str.contains(word)]
+    def _get_payload(self):
+        self.prim_url = re.sub("https?://|www|\.comdinheiro\.com\.br/", "", self.prim_url)
+        self.payload = (self.login +
+                        "&URL=" + urllib.parse.quote_plus(self.prim_url) +
+                        "&format=json2"
+                       )
+
+    def get_params(self):
+        if self._params is None:
+            self._params = {i: j for i, j in zip(re.findall("&(.*?)=", self.prim_url),
+                                                 re.findall("=(.*?)(?=&|$)", self.prim_url))}
+        return self._params
+
+    def set_params(self, params: dict):
+        """
+        changes the default parameters used when passing the primitive url
+        params: dictionary containing key value pairs to set the parameters
+        """
+        # set self._params if None
+        if self._params is None:
+            self.get_params()
+
+        # check if passed dict contains all params
+        if len(set(self._params).intersection(params)) != len(self._params):
+            print("Must pass dictionary containing all possible params\n"+
+                  "(tip: use the dict returned by self.get_params())"
+            )
+            return 1
+        else:
+            # set params
+            tmp = self.prim_url
+            for key, value in params.items():
+                tmp = re.sub(f"({key}=)(.*?)(&|$)", fr"\g<1>{value}\g<3>", tmp)
+
+            # update the payload based on the new prim_url
+            self.prim_utl = tmp
+            self._get_payload()
+
 
 class fund_screener(instrument):
     def __init__(self, username, password, variaveis, filtro, data_rr, data_cart, salve="", overwrite=0, cotas=7,  periodos=0):
@@ -249,214 +285,6 @@ class historico_multiplo(instrument):
         super().get_data(**kwargs)
         self.df.index = self.df["data"]
         self.df = self.df.drop("data", axis=1)
-
-class make_instrument(instrument):
-    def __init__(self, username, password, url):
-        super().__init__(username, password)
-        self.prim_url = url
-        self._params = None
-        self._get_payload()
-
-    def _get_payload(self):
-        self.prim_url = re.sub("https?://|www|\.comdinheiro\.com\.br/", "", self.prim_url)
-        self.payload = (self.login +
-                        "&URL=" + urllib.parse.quote_plus(self.prim_url) +
-                        "&format=json2"
-                       )
-
-    def get_params(self):
-        if self._params is None:
-            self._params = {i: j for i, j in zip(re.findall("&(.*?)=", self.prim_url),
-                                                 re.findall("=(.*?)(?=&|$)", self.prim_url))}
-        return self._params
-
-    def set_params(self, params: dict):
-        """
-        changes the default parameters used when passing the primitive url
-        params: dictionary containing key value pairs to set the parameters
-        """
-        # set self._params if None
-        if self._params is None:
-            self.get_params()
-
-        # check if passed dict contains all params
-        if len(set(self._params).intersection(params)) != len(self._params):
-            print("Must pass dictionary containing all possible params\n"+
-                  "(tip: use the dict returned by self.get_params())"
-            )
-            return 1
-        else:
-            # set params
-            tmp = self.prim_url
-            for key, value in params.items():
-                tmp = re.sub(f"({key}=)(.*?)(&|$)", fr"\g<1>{value}\g<3>", tmp)
-
-            # update the payload based on the new prim_url
-            self.prim_utl = tmp
-            self._get_payload()
-
-def repl_num(df, col):
-    # só é útil pra verificar isso da coluna ser string com ponto pra indicador de milhar
-    if df[col].str.contains(".", regex=False).any():
-        raise Exception("A string tem um ponto . isso vai zuar na hora de converter, provavelmente é por conta do separador de milhar")
-    else:
-        df[col] = df[col].str.replace(",", ".").astype(float)
-
-def tracking_error(df, ibov, ddof=0):
-    # expects the ibov column to be named "ibov"
-    return df.pct_change().iloc[1:].sub(ibov.pct_change().iloc[1:]["ibov"], axis=0).std(ddof=ddof)
-
-def drawdown(path, plot_name: list=[False, None], ibov=None, check_dates=False, **kwargs):
-    """
-    IMPORTANTE: o df e o ibov tem que ter os mesmos índices para realizar o .subtract corretamente
-    path: pode ser ou um dataframe ou o path pro excel/csv
-    plot_name: é uma lista [boolean, nome da coluna] o boolean é pra ter plot ou não
-    ibov: passa um dataframe do ibov (se o ibov for uma coluna do df faz df[["ibov"]])
-    check_dates: only used if ibov not None, makes sure ibov and each series start at the same date
-    """
-    df = path
-    if type(path) == str:
-        extension = os.path.splitext(path)[1]
-        # maybe other cases other than csv and excel
-        if extension == ".csv":
-            df = pd.read_csv(path, index_col=0, parse_dates=True, **kwargs)
-        else:
-            df = pd.read_excel(path, index_col=0, **kwargs)
-
-    df = df.pct_change().iloc[1:]
-    # o df.sub() pro ibov vai aqui
-    df.columns = df.columns.str.strip().str.replace("\n", "")
-
-    if ibov is not None:
-        if check_dates:
-            cumulative = (df.apply(lambda x: 
-                                      (x + 1).cumprod().sub(
-                                      (ibov.loc[x.dropna().index[0]:, "ibov"].pct_change().iloc[1:] + 1)
-                                      .cumprod(), axis=0
-                                      )
-                                  )
-                         ) + 1
-            tmp_cum = (df + 1).cumprod()
-            tmp_ib = df.apply(lambda x: (ibov.loc[x.dropna().index[0]:, "ibov"].pct_change().iloc[1:] + 1).cumprod())
-        else:
-            cumulative = (df + 1).cumprod().sub((ibov.pct_change().iloc[1:]["ibov"] + 1).cumprod(), axis=0)
-    else:
-        if check_dates:
-            warnings.warn("check dates doesn't do anything if ibov is None")
-        cumulative = (df + 1).cumprod()
-
-    peaks = cumulative.cummax()
-    drawdown = (cumulative - peaks)/peaks
-
-    max_drawdowns = pd.DataFrame()
-    max_drawdowns["min"] = drawdown.min()
-    max_drawdowns["idxmin"] = drawdown.idxmin()
-
-    if plot_name[0]:
-        if plot_name[1] is None:
-            print(df.columns)
-            plot_name[1]= input("Nome: ")
-        fig, ax = plt.subplots()
-        ax.plot(cumulative[plot_name[1]], label="Cumulative Returns")
-        ax.plot(peaks[plot_name[1]], label="Peaks")
-
-        # esse aqui plota o cumulativo do ibov teoricamente, refazer
-        if ibov is not None:
-            # ax.plot((1 + woj[all_dfs[plot_name[1]].dropna().iloc[0,].name:].pct_change()).cumprod(), label="ibov")
-            ax.plot(tmp_ib[plot_name[1]], label="ibov")
-            ax.plot(tmp_cum[plot_name[1]], label=plot_name[1] + "_no_sub")
-
-        ax.scatter(drawdown[plot_name[1]].idxmin(),
-                cumulative.loc[drawdown[plot_name[1]].idxmin()][plot_name[1]],
-                s=100,
-                marker="o",
-                color="red",
-                label="Max Drawdown",
-                zorder=4
-                )
-
-        fig.figsize = (16, 9)
-        ax.legend(bbox_to_anchor=(.5, -.15))
-        fig.tight_layout()
-        plt.show()
-
-    return {"cumulative": cumulative,
-            "peaks": peaks,
-            "drawdown": drawdown,
-            "max_drawdowns": max_drawdowns
-    }
-
-def beta(df, ibov_col="ibov", **kwargs):
-    # verificar se não começa com na, se pá iloc da primeira linha e ver se tem algum na (.isna)
-    # se possível usar o sklearn.LinearRegression msm, vira e mexe aqui dá algum prob
-    if len(kwargs) > 0:
-        df = df.loc[df.index[-1] + dateutil.relativedelta.relativedelta(**kwargs):, :]
-    temp_df = df.apply(lambda x: x[x.dropna().index[0]:].cov(df[ibov_col][x.dropna().index[0]:], ddof=0) / df[ibov_col][x.dropna().index[0]:].var(ddof=0)\
-                              if np.isnan(x.iloc[0]) else\
-                                  x.cov(df[ibov_col], ddof=0) / df[ibov_col].var(ddof=0), axis=0)
-    return temp_df.rename(lambda x: x+f"* {df[x].dropna().index[0].strftime('%Y-%m-%d')}" if np.isnan(df[x].iloc[0]) else x)
-
-def fix_name(s):
-    mm = re.compile("(:?Fundos? de Investimentos?|FI) Multimercados?", re.I)
-    ac = re.compile("(:?Fundos? (:?de|em) Invest[ ]?iment[ ]?os?|FI) (:?de|em) A[CcÇç][OoÕõ]es?", re.I)
-    ie = re.compile("Investimento (:?no|do) Exterior", re.I)
-    fic = re.compile("(:?Fundos? de Invest[ ]?iment[ ]?os?|FI) em Cot[ ]?as", re.I)
-    fiq = re.compile("(:?Fundos? de Investimentos?|FI) em Quotas", re.I)
-    rf = re.compile("Renda Fixa", re.I)
-    
-    fi = re.compile("Fundos? de Investimento", re.I)
-    # ac = re.compile("Fundo De Investimento Multimercados?", re.I)
-
-    de = re.compile("(FI)(?P<cota>[CQ])( DE FI)(?P<tipo>[MA])?", re.I)
-
-    s = re.sub(mm, "FIM", s)
-    s = re.sub(ac, "FIA", s)
-    s = re.sub(ie, "IE", s)
-    s = re.sub(fic, "FIC", s)
-    s = re.sub(fiq, "FIQ", s)
-    s = re.sub(rf, "RF", s)
-    s = re.sub(fi, "FI", s)
-    s = re.sub(de, "FI\g<cota>FI\g<tipo>", s)
-    return s
-
-def valores_cotas(user, password, cnpjs, desde, dataanalise):
-    variaveis = "valor_cota"
-    hf = historico_fundos(user, password, cnpjs,
-                             variaveis=variaveis,
-                             data_ini=desde.strftime("%d%m%Y"),
-                             data_fim=dataanalise.strftime("%d%m%Y"),
-                             periodicidade="diaria",
-                             tabela="h"
-                             )
-    hf.get_data()
-
-    hf.df.index = pd.to_datetime(hf.df["data"], format="%d/%m/%Y")
-    hf.df = hf.df.drop("data", axis=1)
-    hf.df.columns = hf.df.columns.str[13:28]
-
-    hf.df = hf.df.applymap(lambda x: np.nan if x == [] else x)
-    hf.df = hf.df.apply(lambda x: x.str.replace(",", ".").astype(float)\
-                            if x.dtype != "float64" else x)
-    return hf.df
-
-def indicadores(user, password, indicador, desde, dataanalise):
-    """
-    ANBIMA_IHFA
-    IBOV
-    CDI
-    """
-    hm = historico_multiplo(user, password, indicador,
-                               desde.strftime("%d%m%Y"),
-                               (dataanalise + dateutil.relativedelta.relativedelta(days=-1)).strftime("%d%m%Y")
-        )
-    hm.get_data(tab=1)
-    hm.df.index = pd.to_datetime(hm.df.index, format="%d/%m/%Y")
-
-    hm.df = hm.df.applymap(lambda x: np.nan if x == [] else x)
-    hm.df = hm.df.applymap(lambda x: np.nan if x == "nd" else x)
-    hm.df = hm.df.apply(lambda x: x.str.replace(",", ".").astype(float)\
-                            if x.dtype != "float64" else x)
-    return hm.df
 
 if __name__=="__main__":
     pass
