@@ -1,5 +1,5 @@
 # Comdinheiro API
-[Utilização](#-utilização)
+[Utilização](#utilização)
 
 Código para auxílio na interação com a api do comdinheiro
 
