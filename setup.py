@@ -14,7 +14,6 @@ setup(
           'requests',
           "numpy",
           "pandas",
-          "matplotlib",
       ],
     classifiers=[
     'Development Status :: 3 - Alpha',

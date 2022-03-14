@@ -9,7 +9,6 @@ import datetime
 import requests
 import pandas as pd
 from typing import Union
-import matplotlib.pyplot as plt
 
 class instrument:
     """
