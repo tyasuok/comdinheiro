@@ -1,11 +1,18 @@
 # Comdinheiro API
-[Utilização](#utilização)
 
 Código para auxílio na interação com a api do comdinheiro
 
+[Instalação](#instalação)
+
+[Utilização](#utilização)
+
+# Instalação
+
+`pip install comdinheiro`
+
 # Utilização
 ```python
-from instruments import *
+from comdinheiro.instruments import *
 url = "https://www.comdinheiro.com.br/HistoricoIndicadoresFundos001.php?&cnpjs=29726133000121+28581166000168&data_ini=16112021&data_fim=07032022&indicadores=patrimonio~cotistas+beta_48m+valor_total+captacao+resgate+valor_cota&op01=tabela_h&num_casas=2&enviar_email=0&periodicidade=diaria&cabecalho_excel=modo2&transpor=0&asc_desc=desc&tipo_grafico=linha&relat_alias_automatico=cmd_alias_01"
 ins = make_instrument(usuario, senha, url)
 ins.get_data()
@@ -18,3 +25,10 @@ print(ins.df.head())
 |  2 | 03/03/2022 | 309298,024599                                             | []                                                 | 1633719325,84                                          | 9525157,75                                              | 30535139,18                                            | 1,5414114                                           | 237858,792813                                              | []                                                  | 267052516,4                                             | 64610,76                                                 | 10810                                                   | 1,367055                                             |
 |  3 | 02/03/2022 | 314065,51323                                              | []                                                 | 1615898370,64                                          | 1387029,58                                              | 858397,74                                              | 1,5342904                                           | 239658,350155                                              | []                                                  | 265148872,81                                            | 1006239                                                  | 132682,58                                               | 1,3640137                                            |
 |  4 | 25/02/2022 | 317297,11381                                              | []                                                 | 1626170136,95                                          | 14507714,4                                              | 341860,18                                              | 1,5430078                                           | 240792,535575                                              | []                                                  | 267264207,81                                            | 825205,93                                                | 330097,29                                               | 1,3725289                                            |
+
+```python
+# remover listas vazias (o formato devolvido pelo comdinheiro para valores nulos)
+ins.df = ins.df.applymap(lambda x: np.nan if x == [] else x)
+# trocar vírgulas por pontos e converter para float (vem como string)
+ins.df[numeric_cols] = ins.df[numeric_cols].apply(lambda x: x.str.replace(",", ".").astype(float))
+```
