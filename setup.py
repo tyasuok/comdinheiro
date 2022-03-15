@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
     name = 'comdinheiro',
     packages = ['comdinheiro'],
-    version = '0.1.1',
+    version = '0.1.2',
     license='GNU General Public License v2 (GPLv2)',
     description = "Interact with comdinheiro's API",
     author = 'Thomas Yasuoka',
