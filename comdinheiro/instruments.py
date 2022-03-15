@@ -167,8 +167,8 @@ class fund_screener(instrument):
         super().__init__(username, password)
 
         self.fmt = "%d/%m/%Y"
-        encod = urllib.parse.quote_plus((f"?&relat=&data_rr={_date_handler(data_rr)}"
-        f"&data_cart={_date_handler(data_cart)}&"
+        encod = urllib.parse.quote_plus((f"?&relat=&data_rr={self._date_handler(data_rr)}"
+        f"&data_cart={self._date_handler(data_cart)}&"
         f"variaveis={urllib.parse.quote_plus(variaveis.replace(' ', '+'), safe='~')}"
         f"&agrupar=&gr_classe=FI&cl_cvm=todos&cl_anb=todos&admin=&gestor=&situacao=4"
         f"&cotas={cotas}&quali=7&exclu=7&forma=3&largura=960&truncar=200&casas=2&salve={salve}"
@@ -199,8 +199,8 @@ class historico_fundos(instrument):
         self.payload = (self.login + 
             "&URL=HistoricoIndicadoresFundos001.php"
             f"%3Fcnpjs%3D{urllib.parse.quote_plus(cnpjs.replace(' ', '+').replace('/', '~'), safe='~')}"
-            f"%26data_ini%3D{_date_handler(data_ini)}"
-            f"%26data_fim%3D{_date_handler(data_fim)}" +\
+            f"%26data_ini%3D{self._date_handler(data_ini)}"
+            f"%26data_fim%3D{self._date_handler(data_fim)}" +\
             urllib.parse.quote_plus(f"&indicadores={variaveis.replace(' ', '+')}", safe="~") +\
             f"%26op01%3Dtabela_{tabela}"
             f"%26num_casas%3D2%26enviar_email%3D0%26periodicidade%3D{periodicidade}%26cabecalho_excel%3Dmodo2%26transpor%3D0"
@@ -228,7 +228,7 @@ class risk_corr(instrument):
         self.payload = (self.login + 
             "&URL=Risco001.php"
             f"%3Fticker%3D{urllib.parse.quote_plus(tickers.replace(' ', '+').replace('/', '~'), safe='~')}"
-            f"%26data_ini%3D{_date_handler(data_ini)}%26data_fim%3D{_date_handler(data_fim)}"
+            f"%26data_ini%3D{self._date_handler(data_ini)}%26data_fim%3D{self._date_handler(data_fim)}"
             "%26retorno%3Ddiscreto%26num_casas%3D5%26design%3D2%26maxX%3D%26minX%3D%26maxY%3D%26minY%3D%26risco_grafico%3Danualizado%26opc_rr%3D%26desvpad_amostral%3D0%26exportar%3D%26retorno_periodo%3Danualizado%26check_tracking_error%3D0%26benchmark%3DCDI%26check_grafico_tracking%3D0%26moeda%3D"
             "%26matriz_exibir%3D{matriz}%26cabecalho_excel%3Dmodo2%26descricao%3D%26&format=json2")
 
@@ -271,8 +271,8 @@ class historico_multiplo(instrument):
         self.payload = (self.login +
             "&URL=HistoricoCotacao002.php"
             f"%3F%26x%3D{urllib.parse.quote_plus(cnpjs.replace(' ', '+').replace('/', '~'), safe='~')}%26"
-            f"data_ini%3D{_date_handler(data_ini)}"
-            f"%26data_fim%3D{_date_handler(data_fim)}"
+            f"data_ini%3D{self._date_handler(data_ini)}"
+            f"%26data_fim%3D{self._date_handler(data_fim)}"
             "%26pagina%3D1%26d%3DMOEDA_ORIGINAL%26g%3D0%26m%3D0%26info_desejada%3Dnumero_indice%26retorno%3Ddiscreto%26tipo_data%3Ddu_br%26tipo_ajuste%3Dtodosajustes%26num_casas%3D2%26enviar_email%3D0%26ordem_legenda%3D1%26cabecalho_excel%3Dmodo1%26classes_ativos%3D9ur54ut49vj%26ordem_data%3D1%26rent_acum%3Drent_acum%26minY%3D%26maxY%3D%26deltaY%3D%26preco_nd_ant%3D0%26base_num_indice%3D100%26flag_num_indice%3D0%26eixo_x%3DData%26startX%3D0%26max_list_size%3D20%26line_width%3D2%26titulo_grafico%3D%26legenda_eixoy%3D%26tipo_grafico%3Dline&format=json2"
         )
 
