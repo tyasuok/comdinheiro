@@ -193,9 +193,10 @@ class historico_fundos(instrument):
         """
         super().__init__(username, password)
 
-        self.fmt = "%Y%m%d"
+        self.fmt = "%d%m%Y"
 
         self.tabela = tabela
+        print(urllib.parse.quote_plus(cnpjs.replace(' ', '+').replace('/', '~'), safe='~'))
         self.payload = (self.login + 
             "&URL=HistoricoIndicadoresFundos001.php"
             f"%3Fcnpjs%3D{urllib.parse.quote_plus(cnpjs.replace(' ', '+').replace('/', '~'), safe='~')}"
