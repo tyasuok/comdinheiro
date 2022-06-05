@@ -1,4 +1,4 @@
-from comdinheiro.instruments import *
+from comdinheiro import *
 import os
 
 url = "https://www.comdinheiro.com.br/HistoricoIndicadoresFundos001.php?&cnpjs=29726133000121+28581166000168&data_ini=16112021&data_fim=07032022&indicadores=patrimonio~cotistas+beta_48m+valor_total+captacao+resgate+valor_cota&op01=tabela_h&num_casas=2&enviar_email=0&periodicidade=diaria&cabecalho_excel=modo2&transpor=0&asc_desc=desc&tipo_grafico=linha&relat_alias_automatico=cmd_alias_01"
