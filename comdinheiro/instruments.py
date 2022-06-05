@@ -104,7 +104,7 @@ class make_instrument(instrument):
         """
         super().__init__(username, password)
         self.prim_url = url
-        self._params = None
+        self._arguments = None
         self._get_payload()
 
     def _get_payload(self):
@@ -117,34 +117,34 @@ class make_instrument(instrument):
                         "&format=json2"
                        )
 
-    def get_params(self) -> dict:
+    def get_arguments(self) -> dict:
         """
         returns dictionary with the instrument parameters
         """
-        if self._params is None:
-            self._params = {i: j for i, j in zip(re.findall("&(.*?)=", self.prim_url),
+        if self._arguments is None:
+            self._arguments = {i: j for i, j in zip(re.findall("&(.*?)=", self.prim_url),
                                                  re.findall("=(.*?)(?=&|$)", self.prim_url))}
-        return self._params
+        return self._arguments
 
-    def set_params(self, params: dict):
+    def set_arguments(self, arguments: dict):
         """
         changes the default parameters used when passing the primitive url
-        params: dictionary containing key value pairs to set the parameters
+        arguments: dictionary containing key value pairs to set the parameters
         """
-        # set self._params if None
-        if self._params is None:
-            self.get_params()
+        # set self._arguments if None
+        if self._arguments is None:
+            self.get_arguments()
 
         # check if passed dict contains all params
-        if len(set(self._params).intersection(params)) != len(self._params):
+        if len(set(self._arguments).intersection(arguments)) != len(self._arguments):
             print("Must pass dictionary containing all possible params\n"+
-                  "(tip: use the dict returned by self.get_params())"
+                  "(tip: use the dict returned by self.get_arguments())"
             )
             return 1
         else:
             # set params
             tmp = self.prim_url
-            for key, value in params.items():
+            for key, value in arguments.items():
                 tmp = re.sub(f"({key}=)(.*?)(&|$)", fr"\g<1>{value}\g<3>", tmp)
 
             # update the payload based on the new prim_url
