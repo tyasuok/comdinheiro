@@ -12,11 +12,12 @@ Código para auxílio na interação com a api do comdinheiro
 
 # Utilização
 ```python
-from comdinheiro.instruments import *
+from comdinheiro import *
 url = "https://www.comdinheiro.com.br/HistoricoIndicadoresFundos001.php?&cnpjs=29726133000121+28581166000168&data_ini=16112021&data_fim=07032022&indicadores=patrimonio~cotistas+beta_48m+valor_total+captacao+resgate+valor_cota&op01=tabela_h&num_casas=2&enviar_email=0&periodicidade=diaria&cabecalho_excel=modo2&transpor=0&asc_desc=desc&tipo_grafico=linha&relat_alias_automatico=cmd_alias_01"
 ins = make_instrument(usuario, senha, url)
 ins.get_data()
 print(ins.df.head())
+
 ```
 |    | data       | patrimonio/cotistas29726133/000121kapitalo_k10_ficfi_mm   | beta48_meses29726133/000121kapitalo_k10_ficfi_mm   | valor_dos_ativos29726133/000121kapitalo_k10_ficfi_mm   | captacao_no_diar$29726133/000121kapitalo_k10_ficfi_mm   | resgate_no_diar$29726133/000121kapitalo_k10_ficfi_mm   | valor_da_cota29726133/000121kapitalo_k10_ficfi_mm   | patrimonio/cotistas28581166/000168vinland_macro_ficfi_mm   | beta48_meses28581166/000168vinland_macro_ficfi_mm   | valor_dos_ativos28581166/000168vinland_macro_ficfi_mm   | captacao_no_diar$28581166/000168vinland_macro_ficfi_mm   | resgate_no_diar$28581166/000168vinland_macro_ficfi_mm   | valor_da_cota28581166/000168vinland_macro_ficfi_mm   |
 |---:|:-----------|:----------------------------------------------------------|:---------------------------------------------------|:-------------------------------------------------------|:--------------------------------------------------------|:-------------------------------------------------------|:----------------------------------------------------|:-----------------------------------------------------------|:----------------------------------------------------|:--------------------------------------------------------|:---------------------------------------------------------|:--------------------------------------------------------|:-----------------------------------------------------|
@@ -27,6 +28,32 @@ print(ins.df.head())
 |  4 | 25/02/2022 | 317297,11381                                              | []                                                 | 1626170136,95                                          | 14507714,4                                              | 341860,18                                              | 1,5430078                                           | 240792,535575                                              | []                                                  | 267264207,81                                            | 825205,93                                                | 330097,29                                               | 1,3725289                                            |
 
 ```python
+# alterar parâmetros da consulta
+arguments = ins.get_arguments()
+print(arguments)
+```
+```yaml
+{'asc_desc': 'desc',
+ 'cabecalho_excel': 'modo2',
+ 'cnpjs': '29726133000121+28581166000168',
+ 'data_fim': '07032022',
+ 'data_ini': '16112021',
+ 'enviar_email': '0',
+ 'indicadores': 'patrimonio~cotistas+beta_48m+valor_total+captacao+resgate+
+valor_cota',
+ 'num_casas': '2',
+ 'op01': 'tabela_h',
+ 'periodicidade': 'diaria',
+ 'relat_alias_automatico': 'cmd_alias_01',
+ 'tipo_grafico': 'linha',
+ 'transpor': '0'}
+```
+```python
+# alterando a data inicial para 01/01/2021
+arguments["data_ini"] = "01112021"
+ins.set_arguments(arguments) # informando à consulta os novos argumentos
+ins.get_data() # realizando a consulta com os novos argumentos
+
 # remover listas vazias (o formato devolvido pelo comdinheiro para valores nulos)
 ins.df = ins.df.applymap(lambda x: np.nan if x == [] else x)
 # trocar vírgulas por pontos e converter para float (vem como string)
