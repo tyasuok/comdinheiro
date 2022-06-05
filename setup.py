@@ -2,13 +2,13 @@ from distutils.core import setup
 setup(
     name = 'comdinheiro',
     packages = ['comdinheiro'],
-    version = '0.1.4',
+    version = '0.1.5',
     license='GNU General Public License v2 (GPLv2)',
     description = "Interact with comdinheiro's API",
     author = 'Thomas Yasuoka',
     author_email = 'thomas.yasuoka@outlook.com',
     url = 'https://github.com/thomas-yasuoka/comdinheiro',
-    download_url = "https://github.com/thomas-yasuoka/comdinheiro/archive/refs/tags/v0.1.4.tar.gz",
+    download_url = "https://github.com/thomas-yasuoka/comdinheiro/archive/refs/tags/v0.1.5.tar.gz",
     keywords = ['api', 'comdinheiro'],
     install_requires=[
           'requests',
