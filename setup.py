@@ -8,7 +8,7 @@ setup(
     author = 'Thomas Yasuoka',
     author_email = 'thomas.yasuoka@outlook.com',
     url = 'https://github.com/thomas-yasuoka/comdinheiro',
-    download_url = "https://github.com/thomas-yasuoka/comdinheiro/archive/refs/tags/v0.1.5.tar.gz",
+    download_url = "https://github.com/thomas-yasuoka/comdinheiro/archive/refs/tags/v0.1.6.tar.gz",
     keywords = ['api', 'comdinheiro'],
     install_requires=[
           'requests',
