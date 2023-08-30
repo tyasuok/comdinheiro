@@ -148,7 +148,7 @@ class make_instrument(instrument):
                 tmp = re.sub(f"({key}=)(.*?)(&|$)", fr"\g<1>{value}\g<3>", tmp)
 
             # update the payload based on the new prim_url
-            self.prim_utl = tmp
+            self.prim_url = tmp
             self._get_payload()
             return 0
 
